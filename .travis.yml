@@ -1,0 +1,19 @@
+---
+services:
+  - docker
+
+env:
+  - distribution: metasploit
+
+before_install:
+  - 'sudo docker build --no-cache --rm --file=Dockerfile.${distribution} --tag=diodonfrost/${distribution}:metasploit .'
+
+script:
+  - container_id=$(mktemp)
+  - 'sudo docker run --detach --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro diodonfrost/${distribution}:metasploit > "${container_id}"'
+
+  # Test role
+  - 'inspec exec tests/inspec -t docker://$(cat ${container_id})'
+
+  # Delete container
+  - 'sudo docker rm -f "$(cat ${container_id})"'
