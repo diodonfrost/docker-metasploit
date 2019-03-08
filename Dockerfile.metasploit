@@ -44,7 +44,7 @@ RUN apt-get update && apt-get -y install \
   && rm -rf /var/lib/apt/lists/*
 
 # Install bundle
-RUN /bin/bash -l -c "gem install bundle --no-ri --no-rdoc"
+RUN /bin/bash -l -c "gem install bundler -v 1.16.1 --no-ri --no-rdoc"
 
 # Clone Metasploit github
 RUN git clone https://github.com/rapid7/metasploit-framework /opt/metasploit-framework
