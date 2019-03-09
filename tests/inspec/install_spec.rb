@@ -12,6 +12,17 @@ end
 
 control 'install-02' do
   impact 1.0
+  title 'msfvenom install'
+  desc 'msfvenom should be presetn'
+  describe file('/opt/metasploit-framework/msfvenom') do
+    it { should exist }
+    it { should be_executable }
+  end
+end
+
+
+control 'install-03' do
+  impact 1.0
   title 'Metasploit symlink'
   desc 'Metasploit symlink should be present in /bin'
   describe file('/bin//msfconsole') do
