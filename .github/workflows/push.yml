@@ -1,0 +1,46 @@
+name: Push
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 18 * * sun'
+
+jobs:
+  push:
+    name: Metasploit image build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Inspec
+        run: curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec -v 4.18.51
+
+      - name: Build Docker image
+        run: docker build --no-cache --rm --file=Dockerfile.metasploit --tag=diodonfrost/metasploit:latest .
+
+      - name: Test Docker image
+        run: |
+          container_id=$(mktemp)
+          sudo docker run --detach --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro diodonfrost/metasploit:latest sleep 300 > "${container_id}"
+
+          inspec exec tests/inspec --chef-license accept-silent -t docker://$(cat ${container_id})
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          # Login on dockerhub.io before pushing
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+          # Pushing image to dockerhub
+          docker push diodonfrost/metasploit:latest
+
+      - name: Push Docker image to Github Docker registry
+        run: |
+          # Login on Github Docker registry before pushing
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u diodonfrost --password-stdin
+
+          # Pushing image to Github Docker registry
+          docker tag diodonfrost/metasploit:latest docker.pkg.github.com/diodonfrost/docker-metasploit/metasploit:latest
+          docker push docker.pkg.github.com/diodonfrost/docker-metasploit/metasploit:latest
