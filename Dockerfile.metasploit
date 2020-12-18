@@ -1,5 +1,5 @@
-FROM ubuntu:18.04
-MAINTAINER diodonfrost <diodon.frost@diodonfrost.me>
+FROM ubuntu:20.04
+LABEL maintainer="diodonfrost <diodon.frost@diodonfrost.me>"
 
 # Update system
 RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y software-properties-common && rm -rf /var/lib/apt/lists/*
@@ -44,7 +44,7 @@ RUN apt-get update && apt-get -y install \
   && rm -rf /var/lib/apt/lists/*
 
 # Install bundle
-RUN /bin/bash -l -c "gem install bundler -v 1.16.1 --no-ri --no-rdoc"
+RUN /bin/bash -l -c "gem install bundler"
 
 # Clone Metasploit github
 RUN git clone https://github.com/rapid7/metasploit-framework /opt/metasploit-framework
